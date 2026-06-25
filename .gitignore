@@ -1,0 +1,58 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.uv/
+
+# Build outputs
+.next/
+.turbo/
+dist/
+build/
+out/
+*.tsbuildinfo
+
+# Test / coverage
+coverage/
+.coverage
+.pytest_cache/
+htmlcov/
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+*.pem
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Local data volumes
+/data/
+infra/.data/
+
+# Python tooling
+.ruff_cache/
+.mypy_cache/
+
+# Environment mode state (written by make env-local / env-prod)
+.mode
+
+# Windows NTFS alternate data streams (WSL2 artefacts)
+*:Zone.Identifier
+
+# Claude Code project files
+CLAUDE.md
+.claude/

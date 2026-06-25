@@ -1,0 +1,80 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  web:
+    name: web · typecheck + build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile || pnpm install
+      - run: pnpm --filter @prism/web typecheck
+      - run: pnpm --filter @prism/web build
+
+  api:
+    name: api · ruff + mypy
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install uv
+        run: pip install uv==0.5.6
+      - name: Create venv + install deps
+        run: |
+          uv venv .venv
+          uv pip install --python .venv/bin/python -e ".[dev]"
+      - name: Ruff
+        run: .venv/bin/ruff check .
+      - name: Mypy
+        run: .venv/bin/mypy app
+
+  smoke:
+    name: stack · docker compose smoke
+    runs-on: ubuntu-latest
+    needs: [web, api]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build images
+        run: docker compose -f infra/docker-compose.yml build web api
+      - name: Start stack
+        run: docker compose -f infra/docker-compose.yml up -d postgres redis minio api web
+      - name: Wait for api health
+        run: |
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:8000/api/health; then exit 0; fi
+            sleep 5
+          done
+          docker compose -f infra/docker-compose.yml logs api
+          exit 1
+      - name: Wait for web health
+        run: |
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:3000/healthz; then exit 0; fi
+            sleep 5
+          done
+          docker compose -f infra/docker-compose.yml logs web
+          exit 1
+      - name: Tear down
+        if: always()
+        run: docker compose -f infra/docker-compose.yml down -v

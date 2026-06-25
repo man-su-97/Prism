@@ -1,0 +1,13 @@
+# Local development port overrides — layered on top of docker-compose.yml.
+# Applied automatically by `make env-local` / `make up` / `make build`.
+# Do NOT include this file in `make package` — production doesn't expose these.
+services:
+  api:
+    ports:
+      - "8000:8000"
+  postgres:
+    ports:
+      - "5432:5432"
+  redis:
+    ports:
+      - "6379:6379"
