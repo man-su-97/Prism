@@ -24,8 +24,12 @@ const fontMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Prism",
-  description: "AI-powered analytics dashboard platform",
+  title: {
+    default: "Prism",
+    template: "%s · Prism",
+  },
+  description: "Turn your data into interactive dashboards with an AI analytics co-pilot.",
+  icons: { icon: "/icon.svg" },
 };
 
 export default async function RootLayout({
