@@ -56,3 +56,7 @@ infra/.data/
 # Claude Code project files
 CLAUDE.md
 .claude/
+
+# Internal planning / spec docs
+docs/
+project-plan.md
